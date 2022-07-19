@@ -9,15 +9,15 @@ _Info.log, _PULS.log, _RESP.log or for physiological data saved in DICOM/IMA
 As input it requires the physiological recordings (as specified above) and the
 corresponding FMR file (generated with BV 21.4 or newer).
 
-The output (BIDS-compatible physiological recordings) are saved in the same
+The output (BIDS-compatible physiological recordings) is saved in the same
 folder as the FMR and with the same file-ID as the FMR appended by _Physio.json
 and _Physio.tsv.gz, e.g. 
 sub-01_ses-01_task-emotion_run-01_bold_Physio.tsv.gz
 sub-01_ses-01_task-emotion_run-01_bold_Physio.json
 
 If used in batch mode, a TSV file as input is required. This TSV file lists
-in each line the full pathinformation of the physiorecording (IMA/DCM or _Info.log) 
-and the full pathinformation of the corresponding FMR file, e.g.
+in each line the full path information of the physiorecording (IMA/DCM or _Info.log) 
+and the full path information of the corresponding FMR file, e.g.
 
 C:/Users/BV/Documents/Physio/JUDECK_Test.0009.0001.2021.08.30.12.42.16.691467.153832522.IMA \TAB C:/Users/BV/Documents/Physio/sub-01_ses-01_task-emotion_run-01_bold.fmr
 C:/Users/BV/Documents/Physio/JUDECK_Test.0006.0001.2021.10.08.12.25.28.25127.192152643.IMA \TAB C:/Users/BV/Documents/Physio/sub-02_ses-01_task-emotion_run-01_bold.fmr
