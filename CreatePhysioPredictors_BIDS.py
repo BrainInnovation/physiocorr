@@ -34,7 +34,7 @@ Resulting files will be saved in a directory called 'PhysioOut', which is create
 
 __author__ = "Judith Eck"
 __version__ = "0.1.0"
-__date__ = "18-07-2022"
+__date__ = "20-07-2022"
 __name__ = "CreatePhysioPredictors_BIDS.py"
 
 
@@ -484,8 +484,9 @@ if sdm_task_file_name.endswith('.sdm'):
         sdm_task_colours = lines[counter+2].strip().split('   ')
         sdm_task_name = lines[counter+3].strip().strip('"').split('" "')
         t_data = []
+        colwidth = int(len(lines[counter + 4]) / sdm_task_no_predictors) # taking the length of the first data line and divide by the number of predictors to compute the width of each predictor column
         for line in lines[counter + 4:]:
-            t_data.append([float(s) for s in line.split()[:]])
+                    t_data.append([float(line[i:i+colwidth]) for i in range(0, len(line), colwidth)if line[i]!="\n"])
         sdm_task_data = np.array(t_data)
 
     del (counter, t_data)
@@ -1639,27 +1640,41 @@ if sdm_task_file_name.endswith('.sdm'):
     # calcualte Pearson correlation coefficients and corresponding p-values
     # in physio_task_noise_corr_matrix and physio_task_noise_corrpval_matrix
     
-    if sdm_task_incl_constant:
-        temp = len(sdm_task_name)-1
-        physio_task_noise_corr_matrix = np.zeros((len(physio_regressors_names), len(sdm_task_name)-1))
-        physio_task_noise_corrpval_matrix = np.zeros((len(physio_regressors_names), len(sdm_task_name)-1))
-        task_names = sdm_task_name[0:-1]
-    else: 
-        temp = len(sdm_task_name)
-        physio_task_noise_corr_matrix = np.zeros((len(physio_regressors_names), len(sdm_task_name)))
-        physio_task_noise_corrpval_matrix = np.zeros((len(physio_regressors_names), len(sdm_task_name)))
-        task_names = sdm_task_name
+    # remove all constant predictors, as these are not meaningful for correlation computation
+    task_names = np.array(sdm_task_name)
+    task_data = sdm_task_data
+    constant_task_columns = sdm_task_data == sdm_task_data[0,:]
+    mask_constants = ~constant_task_columns.all(0)
+    task_names = task_names[mask_constants].tolist()
+    task_data = task_data[:,mask_constants]
+    
+    constantpreds = np.array(sdm_task_name)[constant_task_columns.all(0)].tolist()
+    
+    # if a constant task predictor exists, add a note to the _OutputParameters.json file
+    if sdm_task_no_predictors > np.sum(mask_constants):
+        constantpreds = np.array(sdm_task_name)[constant_task_columns.all(0)].tolist()
+        if sdm_task_incl_constant:
+            constantpreds.remove('Constant')
+        if len(constantpreds) > 0:
+            print('Constant Task Regressors Excluded for Task x Physio Correlation: ', constantpreds, ' \n')
+            physio_output_parameters.update({
+                'Constant SDM Task Regressors Detected': constantpreds
+                })
+    
+    physio_task_noise_corr_matrix = np.zeros((len(physio_regressors_names), len(task_names)))
+    physio_task_noise_corrpval_matrix = np.zeros((len(physio_regressors_names), len(task_names)))
+
     for n in range(len(physio_regressors_names)):
-        for t in range(temp):
+        for t in range(len(task_names)):
             # if there are NaNs in the created predictors, perform the correlation without the affected volumes
             if np.sum(np.isnan(physio_regressors_matrix[:,n])) > 0:
                 ind_nan = np.argwhere(np.isnan(physio_regressors_matrix[:,n]))
                 x = np.delete(physio_regressors_matrix[:,n], ind_nan)
-                y = np.delete(sdm_task_data[:,t], ind_nan)
+                y = np.delete(task_data[:,t], ind_nan)
                 corr_p = stats.pearsonr(x,y)
                 del(x,y,ind_nan)
             else:
-                corr_p = stats.pearsonr(physio_regressors_matrix[:,n], sdm_task_data[:,t])
+                corr_p = stats.pearsonr(physio_regressors_matrix[:,n], task_data[:,t])
             physio_task_noise_corr_matrix[n,t] = corr_p[0]
             physio_task_noise_corrpval_matrix[n,t] = corr_p[1]
             del(corr_p)
