@@ -38,7 +38,7 @@ script!
 
 __author__ = "Judith Eck"
 __version__ = "0.1.0"
-__date__ = "18-07-2022"
+__date__ = "21-07-2022"
 __name__ = "SavePhysiologInBIDSfrom_readCMRRPhysio"
 
 # =============================================================================
@@ -173,7 +173,7 @@ for counter in range(np.size(tempfiles, axis=0)):
     vol_onsets = np.int0(np.insert(temp['ACQ'],0,0))
     if sum(np.diff(vol_onsets) == 1)/np.size(fmr_slice_times) > fmr_no_volumes:
         last_data_val = int(temp['SliceMap'][0,fmr_no_volumes,0])-1
-        temp['ACQ'][:last_data_val+1] = False
+        temp['ACQ'][last_data_val+1:] = False
 
     '''
     Save output in TSV and JSON file
