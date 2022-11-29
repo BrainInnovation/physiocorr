@@ -34,7 +34,7 @@ Resulting files will be saved in a directory called 'PhysioOut', which is create
 
 __author__ = "Judith Eck"
 __version__ = "0.1.0"
-__date__ = "20-07-2022"
+__date__ = "29-11-2022"
 __name__ = "CreatePhysioPredictors_BIDS.py"
 
 
@@ -1289,9 +1289,9 @@ else:
     plot_peaks_run, = ax_resp_raw.plot(
         physio_time[resp_peaks_ind_run], resp_filtz[resp_peaks_ind_run], 'g.', zorder=7)
     plot_troughs, = ax_resp_raw.plot(
-        physio_time[resp_troughs_ind], resp[resp_troughs_ind], 'r.', zorder=6)
+        physio_time[resp_troughs_ind], resp_filtz[resp_troughs_ind], 'r.', zorder=6)
     plot_troughs_run, = ax_resp_raw.plot(
-        physio_time[resp_troughs_ind_run], resp[resp_troughs_ind_run], 'g.', zorder=8)
+        physio_time[resp_troughs_ind_run], resp_filtz[resp_troughs_ind_run], 'g.', zorder=8)
     ax_resp_raw.plot(physio_time_10, resp_up_10)
     ax_resp_raw.plot(physio_time_10, resp_low_10)
     y = ax_resp_raw.get_ylim()
